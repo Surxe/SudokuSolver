@@ -1,0 +1,22 @@
+<div class="sudoku-board-container">
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  } @else if (board) {
+    <div class="sudoku-board">
+      @for (row of board; track row) {
+        <div class="sudoku-row">
+          @for (cell of row; track $index) {
+            <div class="sudoku-cell" [class.given]="isGivenCell(cell)">
+              {{ getCellValue(cell) }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="no-puzzle">No puzzle loaded</p>
+  }
+</div>

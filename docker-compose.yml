@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend/Sudoku.Api
+      dockerfile: Dockerfile
+    container_name: sudoku-backend
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PuzzleDataPath=/app/data/puzzles.json
+    volumes:
+      - ./data:/app/data:ro
+    networks:
+      - sudoku-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sudoku-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - sudoku-network
+    environment:
+      - API_URL=http://backend:8080/api/sudoku
+
+networks:
+  sudoku-network:
+    driver: bridge

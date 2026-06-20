@@ -1,0 +1,19 @@
+<div class="controls">
+  <button 
+    class="btn btn-solve" 
+    (click)="onSolve()" 
+    [disabled]="disabled || loading">
+    @if (loading) {
+      <span class="spinner-small"></span>
+      Solving...
+    } @else {
+      Solve
+    }
+  </button>
+  <button 
+    class="btn btn-new" 
+    (click)="onLoadNew()" 
+    [disabled]="loading">
+    Load New Puzzle
+  </button>
+</div>

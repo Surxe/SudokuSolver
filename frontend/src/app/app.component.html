@@ -1,0 +1,28 @@
+<div class="app-container">
+  <header class="header">
+    <h1>Sudoku Solver</h1>
+  </header>
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  }
+
+  <app-sudoku-board [board]="currentBoard" [loading]="loading"></app-sudoku-board>
+
+  <app-solve-button
+    [loading]="loading"
+    [disabled]="!canSolve"
+    (solve)="solvePuzzle()"
+    (loadNew)="loadRandomPuzzle()">
+  </app-solve-button>
+
+  @if (solutionBoard && attempts > 0) {
+    <div class="statistics">
+      <p><strong>Solved!</strong></p>
+      <p>Attempts: {{ attempts }}</p>
+      <p>Duration: {{ durationMs }}ms</p>
+    </div>
+  }
+</div>
