@@ -162,7 +162,6 @@ core/
 │   └─ BoardValidator.cs
 │
 ├─ Parsing/
-│   ├─ CsvPuzzleParser.cs
 │   └─ JsonPuzzleParser.cs
 │
 └─ Utilities/
