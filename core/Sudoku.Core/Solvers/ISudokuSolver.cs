@@ -65,6 +65,11 @@ public class SolveResult
     /// Gets an error message if solving failed.
     /// </summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Gets the sequence of steps taken during solving (attempts and backtracks).
+    /// </summary>
+    public List<SolveStep> Steps { get; set; } = [];
 }
 
 /// <summary>

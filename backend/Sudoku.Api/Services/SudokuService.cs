@@ -62,7 +62,17 @@ public class SudokuService : ISudokuService
                         Solution = Convert2DToJagged(result.Solution.ToArray()),
                         Attempts = result.Attempts,
                         Backtracks = result.Backtracks,
-                        DurationMs = (long)result.Duration.TotalMilliseconds
+                        DurationMs = (long)result.Duration.TotalMilliseconds,
+                        Steps = result.Steps.Select(s => new SolveStepDto
+                        {
+                            Type = s.Type.ToString(),
+                            Row = s.Row,
+                            Col = s.Col,
+                            Value = s.Value,
+                            AttemptNumber = s.AttemptNumber,
+                            BacktrackNumber = s.BacktrackNumber,
+                            Board = s.Board
+                        }).ToList()
                     };
                 }
                 else
@@ -73,7 +83,17 @@ public class SudokuService : ISudokuService
                         ErrorMessage = result.ErrorMessage ?? "Failed to solve puzzle",
                         Attempts = result.Attempts,
                         Backtracks = result.Backtracks,
-                        DurationMs = (long)result.Duration.TotalMilliseconds
+                        DurationMs = (long)result.Duration.TotalMilliseconds,
+                        Steps = result.Steps.Select(s => new SolveStepDto
+                        {
+                            Type = s.Type.ToString(),
+                            Row = s.Row,
+                            Col = s.Col,
+                            Value = s.Value,
+                            AttemptNumber = s.AttemptNumber,
+                            BacktrackNumber = s.BacktrackNumber,
+                            Board = s.Board
+                        }).ToList()
                     };
                 }
             }

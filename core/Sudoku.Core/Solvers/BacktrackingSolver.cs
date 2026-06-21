@@ -12,6 +12,7 @@ public class BacktrackingSolver : ISudokuSolver
     private long _attempts;
     private long _backtracks;
     private ISolverProgressCallback? _callback;
+    private List<SolveStep> _steps = [];
 
     /// <summary>
     /// Attempts to solve a Sudoku puzzle.
@@ -54,6 +55,7 @@ public class BacktrackingSolver : ISudokuSolver
         _attempts = 0;
         _backtracks = 0;
         _callback = callback;
+        _steps = [];
 
         try
         {
@@ -68,7 +70,8 @@ public class BacktrackingSolver : ISudokuSolver
                     ErrorMessage = $"Invalid board: {string.Join(", ", validationResult.ErrorMessages)}",
                     Attempts = _attempts,
                     Backtracks = _backtracks,
-                    Duration = stopwatch.Elapsed
+                    Duration = stopwatch.Elapsed,
+                    Steps = _steps
                 };
             }
 
@@ -91,7 +94,8 @@ public class BacktrackingSolver : ISudokuSolver
                     Solution = workingBoard,
                     Attempts = _attempts,
                     Backtracks = _backtracks,
-                    Duration = stopwatch.Elapsed
+                    Duration = stopwatch.Elapsed,
+                    Steps = _steps
                 };
             }
             else
@@ -104,7 +108,8 @@ public class BacktrackingSolver : ISudokuSolver
                         : "No solution exists for this puzzle",
                     Attempts = _attempts,
                     Backtracks = _backtracks,
-                    Duration = stopwatch.Elapsed
+                    Duration = stopwatch.Elapsed,
+                    Steps = _steps
                 };
             }
         }
@@ -118,7 +123,8 @@ public class BacktrackingSolver : ISudokuSolver
                 ErrorMessage = $"Error during solving: {ex.Message}",
                 Attempts = _attempts,
                 Backtracks = _backtracks,
-                Duration = stopwatch.Elapsed
+                Duration = stopwatch.Elapsed,
+                Steps = _steps
             };
         }
     }
@@ -151,6 +157,18 @@ public class BacktrackingSolver : ISudokuSolver
             _attempts++;
             board.SetValue(row, col, value);
 
+            // Record attempt step
+            _steps.Add(new SolveStep
+            {
+                Type = SolveStepType.Attempt,
+                Row = row,
+                Col = col,
+                Value = value,
+                AttemptNumber = _attempts,
+                BacktrackNumber = _backtracks,
+                Board = BoardToArray(board)
+            });
+
             // Notify attempt
             _callback?.OnAttempt(row, col, value, _attempts, _backtracks, BoardToArray(board));
 
@@ -162,6 +180,18 @@ public class BacktrackingSolver : ISudokuSolver
             // Backtrack
             _backtracks++;
             board.SetValue(row, col, 0);
+
+            // Record backtrack step
+            _steps.Add(new SolveStep
+            {
+                Type = SolveStepType.Backtrack,
+                Row = row,
+                Col = col,
+                Value = 0,
+                AttemptNumber = _attempts,
+                BacktrackNumber = _backtracks,
+                Board = BoardToArray(board)
+            });
 
             // Notify backtrack
             _callback?.OnBacktrack(row, col, _attempts, _backtracks, BoardToArray(board));

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { SudokuApiService } from './sudoku-api.service';
 import { SudokuBoardComponent } from './sudoku-board/sudoku-board.component';
 import { SolveButtonComponent } from './solve-button/solve-button.component';
+import { SolveStep } from './models/puzzle.model';
 
 @Component({
   selector: 'app-root',
@@ -87,8 +88,8 @@ export class AppComponent implements OnInit, OnDestroy {
           this.backtracks = response.backtracks;
           this.durationMs = response.durationMs;
           
-          // Animate the solution
-          this.animateSolution(response.solution);
+          // Animate the solution using the steps
+          this.animateSolution(response.steps);
         } else {
           this.error = response.errorMessage || 'Failed to solve puzzle';
           this.loading = false;
@@ -102,65 +103,61 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  private animateSolution(solution: number[][]): void {
+  private animateSolution(steps: SolveStep[]): void {
     // Set loading to false so the board is visible during animation
     this.loading = false;
     
-    // Create a copy of the original board to track which cells to fill
-    const originalBoard = this.currentBoard ? JSON.parse(JSON.stringify(this.currentBoard)) : [];
-    let cellIndex = 0;
-    const totalCells = 81;
+    let stepIndex = 0;
     
-    const fillNextCell = () => {
-      if (cellIndex >= totalCells) {
+    const playNextStep = () => {
+      if (stepIndex >= steps.length) {
         this.loading = false;
-        this.currentBoard = solution;
+        this.currentBoard = this.solutionBoard;
         return;
       }
 
-      const row = Math.floor(cellIndex / 9);
-      const col = cellIndex % 9;
-
-      // Only animate cells that were originally empty
-      if (originalBoard[row] && originalBoard[row][col] === 0) {
-        // Update current board with the solution value
-        if (!this.currentBoard) {
-          this.currentBoard = JSON.parse(JSON.stringify(originalBoard));
-        }
-        if (this.currentBoard && this.currentBoard[row]) {
-          this.currentBoard[row][col] = solution[row][col];
-          console.log(`Filling cell [${row}, ${col}] with value ${solution[row][col]}`);
-        }
-        
-        // Direct DOM manipulation to highlight the cell
-        const cells = document.querySelectorAll('.sudoku-cell');
-        console.log(`Found ${cells.length} cells in DOM`);
-        const cellIndexInDOM = row * 9 + col;
-        if (cells[cellIndexInDOM]) {
-          const cell = cells[cellIndexInDOM] as HTMLElement;
+      const step = steps[stepIndex];
+      
+      // Update current board with the step's board state
+      this.currentBoard = JSON.parse(JSON.stringify(step.board));
+      
+      // Highlight the cell based on step type
+      const highlightType = step.type === 'Attempt' ? 'attempt' : 'backtrack';
+      this.highlightCell = { row: step.row, col: step.col, type: highlightType };
+      this.renderCounter++;
+      console.log(`Step ${stepIndex + 1}/${steps.length}: ${step.type} at [${step.row}, ${step.col}] value=${step.value}`);
+      
+      // Direct DOM manipulation to highlight the cell
+      const cells = document.querySelectorAll('.sudoku-cell');
+      const cellIndexInDOM = step.row * 9 + step.col;
+      if (cells[cellIndexInDOM]) {
+        const cell = cells[cellIndexInDOM] as HTMLElement;
+        if (step.type === 'Attempt') {
           cell.style.backgroundColor = '#00ff00';
           cell.style.color = '#000';
           cell.style.fontWeight = '900';
-          cell.style.border = '3px solid #00ff00';
-          console.log(`Directly highlighted cell [${row}, ${col}]`);
-          
-          // Remove highlight after delay
-          setTimeout(() => {
-            cell.style.backgroundColor = '';
-            cell.style.color = '';
-            cell.style.fontWeight = '';
-            cell.style.border = '';
-          }, this.ANIMATION_DELAY_MS);
         } else {
-          console.log(`Cell at index ${cellIndexInDOM} not found in DOM`);
+          cell.style.backgroundColor = '#ff0000';
+          cell.style.color = '#fff';
+          cell.style.fontWeight = '900';
         }
+        console.log(`Directly highlighted cell [${step.row}, ${step.col}] as ${step.type}`);
+        
+        // Remove highlight after delay
+        setTimeout(() => {
+          cell.style.backgroundColor = '';
+          cell.style.color = '';
+          cell.style.fontWeight = '';
+        }, this.ANIMATION_DELAY_MS);
+      } else {
+        console.log(`Cell at index ${cellIndexInDOM} not found in DOM`);
       }
 
-      cellIndex++;
-      this.animationTimer = setTimeout(fillNextCell, this.ANIMATION_DELAY_MS);
+      stepIndex++;
+      this.animationTimer = setTimeout(playNextStep, this.ANIMATION_DELAY_MS);
     };
 
-    fillNextCell();
+    playNextStep();
   }
 
   get canSolve(): boolean {
