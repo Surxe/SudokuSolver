@@ -4,7 +4,7 @@
   align-items: center;
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
 }
 
 .header {
@@ -30,7 +30,7 @@
 }
 
 .statistics {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(30, 30, 46, 0.95);
   padding: 20px 30px;
   border-radius: 8px;
   margin-top: 20px;
@@ -39,11 +39,11 @@
 
   p {
     margin: 8px 0;
-    color: #2c3e50;
+    color: #e0e0e0;
     font-size: 1.1rem;
 
     strong {
-      color: #27ae60;
+      color: #4ade80;
       font-size: 1.3rem;
     }
   }
