@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
   
   // Animation control
   private animationTimer: any = null;
-  private readonly ANIMATION_DELAY_MS = 300; // 300ms per cell fill for better visibility
+  private readonly ANIMATION_DELAY_MS = 10; // 10ms per step for fast animation
 
   constructor(private sudokuApiService: SudokuApiService, private cdr: ChangeDetectorRef) {}
 
