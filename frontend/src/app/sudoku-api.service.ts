@@ -25,6 +25,11 @@ export class SudokuApiService {
     );
   }
 
+  solvePuzzleStream(board: number[][]): EventSource {
+    const encodedBoard = encodeURIComponent(JSON.stringify(board));
+    return new EventSource(`${this.apiUrl}/solve/stream?board=${encodedBoard}`);
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('API Error:', error);
     return throwError(() => error);

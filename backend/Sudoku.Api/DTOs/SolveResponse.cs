@@ -26,6 +26,11 @@ public class SolveResponse
     public long Attempts { get; set; }
 
     /// <summary>
+    /// Number of backtracks made during solving.
+    /// </summary>
+    public long Backtracks { get; set; }
+
+    /// <summary>
     /// Time taken to solve in milliseconds.
     /// </summary>
     public long DurationMs { get; set; }

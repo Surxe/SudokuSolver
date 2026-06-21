@@ -6,9 +6,9 @@
     </div>
   } @else if (board) {
     <div class="sudoku-board">
-      @for (row of board; track row) {
+      @for (rowItem of board; track $index; let rowIndex = $index) {
         <div class="sudoku-row">
-          @for (cell of row; track $index) {
+          @for (cell of rowItem; track $index; let colIndex = $index) {
             <div class="sudoku-cell" [class.given]="isGivenCell(cell)">
               {{ getCellValue(cell) }}
             </div>

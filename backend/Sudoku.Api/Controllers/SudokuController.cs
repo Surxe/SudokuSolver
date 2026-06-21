@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Sudoku.Api.DTOs;
 using Sudoku.Api.Services;
+using Sudoku.Core.Models;
+using Sudoku.Core.Solvers;
+using System.Text.Json;
 
 namespace Sudoku.Api.Controllers;
 
@@ -121,5 +124,71 @@ public class SudokuController : ControllerBase
             _logger.LogError(ex, "Error solving puzzle");
             return StatusCode(500, "An error occurred while solving the puzzle");
         }
+    }
+
+    /// <summary>
+    /// Solves a Sudoku puzzle with streaming progress via Server-Sent Events.
+    /// </summary>
+    /// <param name="board">The board as a URL-encoded JSON array.</param>
+    /// <returns>A stream of solve progress events.</returns>
+    [HttpGet("solve/stream")]
+    [Produces("text/event-stream")]
+    public async Task SolveStream([FromQuery] string board)
+    {
+        Response.ContentType = "text/event-stream";
+        Response.Headers.Append("Cache-Control", "no-cache");
+        Response.Headers.Append("Connection", "keep-alive");
+        Response.Headers.Append("X-Accel-Buffering", "no"); // Disable nginx buffering
+
+        try
+        {
+            var boardData = JsonSerializer.Deserialize<int[][]>(board);
+            if (boardData == null || boardData.Length != 9 || boardData.Any(row => row.Length != 9))
+            {
+                await SendErrorEvent("Invalid board format");
+                return;
+            }
+
+            // Convert jagged array to 2D array
+            var board2D = new int[9, 9];
+            for (int i = 0; i < 9; i++)
+            {
+                for (int j = 0; j < 9; j++)
+                {
+                    board2D[i, j] = boardData[i][j];
+                }
+            }
+
+            var sudokuBoard = new SudokuBoard(board2D);
+            var callback = new SolverProgressCallback(Response);
+            var solver = new BacktrackingSolver();
+
+            // Solve synchronously to maintain response context
+            solver.Solve(sudokuBoard, callback);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Error parsing board JSON");
+            await SendErrorEvent("Invalid board JSON format");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during streaming solve");
+            await SendErrorEvent(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Sends an error event to the SSE stream.
+    /// </summary>
+    private async Task SendErrorEvent(string errorMessage)
+    {
+        var errorEvent = new SolveStreamEvent
+        {
+            EventType = "error",
+            ErrorMessage = errorMessage
+        };
+        var json = JsonSerializer.Serialize(errorEvent);
+        await Response.WriteAsync($"data: {json}\n\n");
     }
 }

@@ -61,6 +61,7 @@ public class SudokuService : ISudokuService
                         Solved = true,
                         Solution = Convert2DToJagged(result.Solution.ToArray()),
                         Attempts = result.Attempts,
+                        Backtracks = result.Backtracks,
                         DurationMs = (long)result.Duration.TotalMilliseconds
                     };
                 }
@@ -71,6 +72,7 @@ public class SudokuService : ISudokuService
                         Solved = false,
                         ErrorMessage = result.ErrorMessage ?? "Failed to solve puzzle",
                         Attempts = result.Attempts,
+                        Backtracks = result.Backtracks,
                         DurationMs = (long)result.Duration.TotalMilliseconds
                     };
                 }

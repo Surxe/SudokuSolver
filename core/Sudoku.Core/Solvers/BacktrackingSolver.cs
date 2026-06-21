@@ -11,6 +11,7 @@ public class BacktrackingSolver : ISudokuSolver
 {
     private long _attempts;
     private long _backtracks;
+    private ISolverProgressCallback? _callback;
 
     /// <summary>
     /// Attempts to solve a Sudoku puzzle.
@@ -30,9 +31,29 @@ public class BacktrackingSolver : ISudokuSolver
     /// <returns>A SolveResult containing the solution and solving statistics.</returns>
     public SolveResult Solve(SudokuBoard board, CancellationToken cancellationToken)
     {
+        return Solve(board, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Attempts to solve a Sudoku puzzle with a progress callback.
+    /// </summary>
+    /// <param name="board">The board to solve.</param>
+    /// <param name="callback">Optional callback for progress updates.</param>
+    /// <returns>A SolveResult containing the solution and solving statistics.</returns>
+    public SolveResult Solve(SudokuBoard board, ISolverProgressCallback? callback)
+    {
+        return Solve(board, callback, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Internal solve method with both callback and cancellation token.
+    /// </summary>
+    private SolveResult Solve(SudokuBoard board, ISolverProgressCallback? callback, CancellationToken cancellationToken)
+    {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         _attempts = 0;
         _backtracks = 0;
+        _callback = callback;
 
         try
         {
@@ -40,6 +61,7 @@ public class BacktrackingSolver : ISudokuSolver
             var validationResult = BoardValidator.ValidateBoard(board);
             if (!validationResult.IsValid)
             {
+                _callback?.OnComplete(BoardToArray(board), _attempts, _backtracks, stopwatch.Elapsed);
                 return new SolveResult
                 {
                     Success = false,
@@ -58,6 +80,9 @@ public class BacktrackingSolver : ISudokuSolver
 
             stopwatch.Stop();
 
+            // Notify completion
+            _callback?.OnComplete(BoardToArray(workingBoard), _attempts, _backtracks, stopwatch.Elapsed);
+
             if (solved)
             {
                 return new SolveResult
@@ -74,8 +99,8 @@ public class BacktrackingSolver : ISudokuSolver
                 return new SolveResult
                 {
                     Success = false,
-                    ErrorMessage = cancellationToken.IsCancellationRequested 
-                        ? "Solving was cancelled" 
+                    ErrorMessage = cancellationToken.IsCancellationRequested
+                        ? "Solving was cancelled"
                         : "No solution exists for this puzzle",
                     Attempts = _attempts,
                     Backtracks = _backtracks,
@@ -86,6 +111,7 @@ public class BacktrackingSolver : ISudokuSolver
         catch (Exception ex)
         {
             stopwatch.Stop();
+            _callback?.OnComplete(BoardToArray(board), _attempts, _backtracks, stopwatch.Elapsed);
             return new SolveResult
             {
                 Success = false,
@@ -125,6 +151,9 @@ public class BacktrackingSolver : ISudokuSolver
             _attempts++;
             board.SetValue(row, col, value);
 
+            // Notify attempt
+            _callback?.OnAttempt(row, col, value, _attempts, _backtracks, BoardToArray(board));
+
             if (SolveRecursive(board, cancellationToken))
             {
                 return true;
@@ -133,6 +162,9 @@ public class BacktrackingSolver : ISudokuSolver
             // Backtrack
             _backtracks++;
             board.SetValue(row, col, 0);
+
+            // Notify backtrack
+            _callback?.OnBacktrack(row, col, _attempts, _backtracks, BoardToArray(board));
         }
 
         return false;
@@ -175,5 +207,24 @@ public class BacktrackingSolver : ISudokuSolver
         }
 
         return (bestRow, bestCol);
+    }
+
+    /// <summary>
+    /// Converts a SudokuBoard to a jagged array for serialization.
+    /// </summary>
+    /// <param name="board">The board to convert.</param>
+    /// <returns>A 9x9 jagged array representation of the board.</returns>
+    private int[][] BoardToArray(SudokuBoard board)
+    {
+        var array = new int[9][];
+        for (int i = 0; i < 9; i++)
+        {
+            array[i] = new int[9];
+            for (int j = 0; j < 9; j++)
+            {
+                array[i][j] = board.GetValue(i, j);
+            }
+        }
+        return array;
     }
 }

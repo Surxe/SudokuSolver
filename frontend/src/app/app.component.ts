@@ -16,6 +16,7 @@ export class AppComponent implements OnInit {
   loading: boolean = false;
   error: string | null = null;
   attempts: number = 0;
+  backtracks: number = 0;
   durationMs: number = 0;
 
   constructor(private sudokuApiService: SudokuApiService) {}
@@ -29,6 +30,7 @@ export class AppComponent implements OnInit {
     this.error = null;
     this.solutionBoard = null;
     this.attempts = 0;
+    this.backtracks = 0;
     this.durationMs = 0;
 
     this.sudokuApiService.getRandomPuzzle().subscribe({
@@ -50,12 +52,14 @@ export class AppComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
+    // Use POST endpoint directly for now
     this.sudokuApiService.solvePuzzle(this.currentBoard).subscribe({
       next: (response) => {
         if (response.solved && response.solution) {
           this.solutionBoard = response.solution;
           this.currentBoard = response.solution;
           this.attempts = response.attempts;
+          this.backtracks = response.backtracks;
           this.durationMs = response.durationMs;
         } else {
           this.error = response.errorMessage || 'Failed to solve puzzle';

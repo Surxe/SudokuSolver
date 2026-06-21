@@ -21,6 +21,14 @@ public interface ISudokuSolver
     /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
     /// <returns>A SolveResult containing the solution and solving statistics.</returns>
     SolveResult Solve(SudokuBoard board, System.Threading.CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Attempts to solve a Sudoku puzzle with a progress callback.
+    /// </summary>
+    /// <param name="board">The board to solve.</param>
+    /// <param name="callback">Optional callback for progress updates.</param>
+    /// <returns>A SolveResult containing the solution and solving statistics.</returns>
+    SolveResult Solve(SudokuBoard board, ISolverProgressCallback? callback);
 }
 
 /// <summary>
@@ -57,4 +65,40 @@ public class SolveResult
     /// Gets an error message if solving failed.
     /// </summary>
     public string? ErrorMessage { get; set; }
+}
+
+/// <summary>
+/// Defines the contract for solver progress callbacks.
+/// </summary>
+public interface ISolverProgressCallback
+{
+    /// <summary>
+    /// Called when a cell placement attempt is made.
+    /// </summary>
+    /// <param name="row">Row index (0-8).</param>
+    /// <param name="col">Column index (0-8).</param>
+    /// <param name="value">Value placed (1-9).</param>
+    /// <param name="attemptNumber">Current attempt number.</param>
+    /// <param name="backtrackNumber">Current backtrack number.</param>
+    /// <param name="board">Current board state as jagged array.</param>
+    void OnAttempt(int row, int col, int value, long attemptNumber, long backtrackNumber, int[][] board);
+
+    /// <summary>
+    /// Called when a backtrack occurs (cell is cleared).
+    /// </summary>
+    /// <param name="row">Row index (0-8).</param>
+    /// <param name="col">Column index (0-8).</param>
+    /// <param name="attemptNumber">Current attempt number.</param>
+    /// <param name="backtrackNumber">Current backtrack number.</param>
+    /// <param name="board">Current board state as jagged array.</param>
+    void OnBacktrack(int row, int col, long attemptNumber, long backtrackNumber, int[][] board);
+
+    /// <summary>
+    /// Called when solving completes (success or failure).
+    /// </summary>
+    /// <param name="board">Final board state as jagged array.</param>
+    /// <param name="totalAttempts">Total number of attempts.</param>
+    /// <param name="totalBacktracks">Total number of backtracks.</param>
+    /// <param name="duration">Time taken to solve.</param>
+    void OnComplete(int[][] board, long totalAttempts, long totalBacktracks, TimeSpan duration);
 }
