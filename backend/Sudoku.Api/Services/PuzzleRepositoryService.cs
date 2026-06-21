@@ -15,8 +15,18 @@ public class PuzzleRepositoryService : IPuzzleRepositoryService
 
     public PuzzleRepositoryService(IConfiguration configuration)
     {
-        _puzzleDataPath = configuration.GetValue<string>("PuzzleDataPath") 
-            ?? Path.Combine("..", "..", "..", "..", "..", "data", "puzzles.json");
+        var configuredPath = configuration.GetValue<string>("PuzzleDataPath");
+        if (!string.IsNullOrEmpty(configuredPath))
+        {
+            _puzzleDataPath = Path.GetFullPath(configuredPath);
+        }
+        else
+        {
+            // Default: resolve from solution root
+            var currentDir = Directory.GetCurrentDirectory();
+            var solutionRoot = Path.GetFullPath(Path.Combine(currentDir, "..", "..", "..", ".."));
+            _puzzleDataPath = Path.Combine(solutionRoot, "data", "puzzles.json");
+        }
     }
 
     /// <summary>
