@@ -56,6 +56,9 @@ export class AppComponent implements OnInit, OnDestroy {
       this.animationTimer = null;
     }
 
+    // Clear any lingering highlights
+    this.clearAllHighlights();
+
     this.sudokuApiService.getRandomPuzzle().subscribe({
       next: (response) => {
         this.currentBoard = response.board;
@@ -79,6 +82,9 @@ export class AppComponent implements OnInit, OnDestroy {
       clearTimeout(this.animationTimer);
       this.animationTimer = null;
     }
+
+    // Clear any lingering highlights
+    this.clearAllHighlights();
 
     this.sudokuApiService.solvePuzzle(this.currentBoard).subscribe({
       next: (response) => {
@@ -108,11 +114,22 @@ export class AppComponent implements OnInit, OnDestroy {
     this.loading = false;
     
     let stepIndex = 0;
+    let previousCell: HTMLElement | null = null;
     
     const playNextStep = () => {
+      // Clear previous highlight
+      if (previousCell) {
+        previousCell.style.backgroundColor = '';
+        previousCell.style.color = '';
+        previousCell.style.fontWeight = '';
+        previousCell = null;
+      }
+      
       if (stepIndex >= steps.length) {
         this.loading = false;
         this.currentBoard = this.solutionBoard;
+        // Clear final highlight
+        this.clearAllHighlights();
         return;
       }
 
@@ -141,16 +158,7 @@ export class AppComponent implements OnInit, OnDestroy {
           cell.style.color = '#fff';
           cell.style.fontWeight = '900';
         }
-        console.log(`Directly highlighted cell [${step.row}, ${step.col}] as ${step.type}`);
-        
-        // Remove highlight after delay
-        setTimeout(() => {
-          cell.style.backgroundColor = '';
-          cell.style.color = '';
-          cell.style.fontWeight = '';
-        }, this.ANIMATION_DELAY_MS);
-      } else {
-        console.log(`Cell at index ${cellIndexInDOM} not found in DOM`);
+        previousCell = cell;
       }
 
       stepIndex++;
@@ -158,6 +166,16 @@ export class AppComponent implements OnInit, OnDestroy {
     };
 
     playNextStep();
+  }
+
+  private clearAllHighlights(): void {
+    const cells = document.querySelectorAll('.sudoku-cell');
+    cells.forEach(cell => {
+      const htmlCell = cell as HTMLElement;
+      htmlCell.style.backgroundColor = '';
+      htmlCell.style.color = '';
+      htmlCell.style.fontWeight = '';
+    });
   }
 
   get canSolve(): boolean {
