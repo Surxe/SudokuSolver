@@ -9,7 +9,9 @@
     </div>
   }
 
-  <app-sudoku-board [board]="currentBoard" [loading]="loading"></app-sudoku-board>
+  @if (currentBoard) {
+    <app-sudoku-board [board]="currentBoard" [loading]="loading" [highlightCell]="highlightCell" [renderKey]="renderKey"></app-sudoku-board>
+  }
 
   <app-solve-button
     [loading]="loading"

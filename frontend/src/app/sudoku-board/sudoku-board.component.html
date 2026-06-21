@@ -9,7 +9,11 @@
       @for (rowItem of board; track $index; let rowIndex = $index) {
         <div class="sudoku-row">
           @for (cell of rowItem; track $index; let colIndex = $index) {
-            <div class="sudoku-cell" [class.given]="isGivenCell(cell)">
+            <div class="sudoku-cell"
+                 [class.given]="isGivenCell(cell)"
+                 [attr.data-row]="rowIndex"
+                 [attr.data-col]="colIndex"
+                 [attr.data-highlight]="highlightCell?.row === rowIndex && highlightCell?.col === colIndex ? (highlightCell?.type || 'attempt') : null">
               {{ getCellValue(cell) }}
             </div>
           }

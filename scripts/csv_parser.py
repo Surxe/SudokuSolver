@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CSV Parser for Kaggle Sudoku Dataset
+CSV Parser for Kaggle Sudoku Dataset "https://www.kaggle.com/datasets/photunix/rrn-sudoku?resource=download"
 Converts Kaggle format CSV to JSON format for the Sudoku Solver project.
 
 Kaggle format: No headers, two columns per row

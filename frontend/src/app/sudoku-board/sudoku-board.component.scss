@@ -73,21 +73,21 @@
   font-size: 1.1rem;
 }
 .sudoku-cell {
-  &.attempt-highlight {
-    animation: pulse-green 0.3s ease-out;
+  box-sizing: border-box;
+  min-width: 40px;
+  min-height: 40px;
+  
+  &[data-highlight="attempt"] {
+    background-color: #00ff00 !important;
+    color: #000 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 10px 3px #00ff00;
   }
 
-  &.backtrack-highlight {
-    animation: pulse-red 0.3s ease-out;
+  &[data-highlight="backtrack"] {
+    background-color: #ff0000 !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 10px 3px #ff0000;
   }
-}
-
-@keyframes pulse-green {
-  0% { background-color: #4ade80; }
-  100% { background-color: #2a2a3e; }
-}
-
-@keyframes pulse-red {
-  0% { background-color: #ef4444; }
-  100% { background-color: #2a2a3e; }
 }
