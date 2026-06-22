@@ -24,3 +24,6 @@ For detailed architecture information, solver algorithms, and API documentation,
 - Real-time visualization of attempts and backtracks
 - Statistics tracking (attempts, backtracks, duration)
 - Responsive web interface
+
+## Website
+This site is not currently hosted
